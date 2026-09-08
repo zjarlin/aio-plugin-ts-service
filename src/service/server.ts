@@ -20,8 +20,8 @@ const pages = [
     required_permission: null,
     body: {
       kind: "text",
-      title: "TypeScript 进程插件已在线",
-      content: "页面和后端服务来自同一个 TypeScript Git 仓库。",
+      title: "TypeScript 进程插件 v2 已在线",
+      content: "v2 页面和后端服务来自同一个 TypeScript Git 仓库。",
     },
   },
 ] as const;
@@ -51,6 +51,7 @@ const server = createServer(async (request, response) => {
         "application/json; charset=utf-8",
         JSON.stringify({
           runtime: "node-typescript",
+          version: 2,
           method: request.method ?? "GET",
           path: url.pathname,
           query: url.search === "" ? null : url.search.slice(1),

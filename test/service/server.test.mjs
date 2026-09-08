@@ -28,6 +28,7 @@ test("serves health page definition and trusted runtime context", async () => {
     });
     assert.deepEqual(await echo.json(), {
       runtime: "node-typescript",
+      version: 2,
       method: "POST",
       path: "/echo",
       query: "value=1",
