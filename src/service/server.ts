@@ -8,8 +8,10 @@ type RuntimeContext = {
   userId: string;
 };
 
-const pages = [
-  {
+let count = 0;
+
+function page() {
+  return {
     id: "ts-process",
     label: "TS 服务",
     icon: "server",
@@ -19,12 +21,13 @@ const pages = [
     },
     required_permission: null,
     body: {
-      kind: "text",
+      kind: "actions",
       title: "TypeScript 进程插件 v2 已在线",
-      content: "v2 页面和后端服务来自同一个 TypeScript Git 仓库。",
+      content: `计数：${count}`,
+      actions: [{ id: "increment", label: "TypeScript +1" }],
     },
-  },
-] as const;
+  } as const;
+}
 
 const port = Number.parseInt(process.env.AIO_PLUGIN_PORT ?? String(DEFAULT_PORT), 10);
 if (!Number.isSafeInteger(port) || port < 1 || port > 65535) {
@@ -39,7 +42,30 @@ const server = createServer(async (request, response) => {
       return;
     }
     if (request.method === "GET" && url.pathname === "/aio/definition") {
-      respond(response, 200, "application/json; charset=utf-8", JSON.stringify(pages));
+      respond(response, 200, "application/json; charset=utf-8", JSON.stringify([page()]));
+      return;
+    }
+    if (request.method === "POST" && url.pathname === "/aio/action") {
+      const action = JSON.parse(await readBody(request)) as {
+        page_id?: string;
+        action_id?: string;
+      };
+      if (action.page_id !== "ts-process" || action.action_id !== "increment") {
+        respond(
+          response,
+          400,
+          "application/json; charset=utf-8",
+          JSON.stringify({ error: "page action is not declared" }),
+        );
+        return;
+      }
+      count += 1;
+      respond(
+        response,
+        200,
+        "application/json; charset=utf-8",
+        JSON.stringify({ body: page().body }),
+      );
       return;
     }
     if (url.pathname === "/echo") {

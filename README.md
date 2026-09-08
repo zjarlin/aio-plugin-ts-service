@@ -11,4 +11,4 @@ pnpm build
 aio plugin validate
 ```
 
-运行时仅使用 Node 标准库，监听 `AIO_PLUGIN_PORT`，提供 `GET /health`、`GET /aio/definition` 与 `/echo`。AIO 通过隔离内部网络转发请求并注入当前用户和租户；插件容器没有外网、宿主文件系统或数据库权限。
+运行时仅使用 Node 标准库，监听 `AIO_PLUGIN_PORT`，提供 `GET /health`、`GET /aio/definition`、`POST /aio/action` 与 `/echo`。计数状态归当前租户的隔离进程，AIO 负责动作白名单、RBAC 和用户/租户上下文注入；插件容器没有外网、宿主文件系统或数据库权限。

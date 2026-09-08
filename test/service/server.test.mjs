@@ -15,7 +15,34 @@ test("serves health page definition and trusted runtime context", async () => {
     assert.equal(await health.text(), "ok");
 
     const definition = await fetch(`http://127.0.0.1:${port}/aio/definition`);
-    assert.equal((await definition.json())[0].id, "ts-process");
+    const pages = await definition.json();
+    assert.equal(pages[0].id, "ts-process");
+    assert.equal(pages[0].body.kind, "actions");
+    assert.equal(pages[0].body.content, "计数：0");
+
+    const action = await fetch(`http://127.0.0.1:${port}/aio/action`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-aio-tenant-id": "tenant-test",
+        "x-aio-user-id": "user-test",
+      },
+      body: JSON.stringify({
+        kind: "page_action",
+        page_id: "ts-process",
+        action_id: "increment",
+        tenant_id: "tenant-test",
+        user_id: "user-test",
+      }),
+    });
+    assert.deepEqual(await action.json(), {
+      body: {
+        kind: "actions",
+        title: "TypeScript 进程插件 v2 已在线",
+        content: "计数：1",
+        actions: [{ id: "increment", label: "TypeScript +1" }],
+      },
+    });
 
     const echo = await fetch(`http://127.0.0.1:${port}/echo?value=1`, {
       method: "POST",
