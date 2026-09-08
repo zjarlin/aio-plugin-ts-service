@@ -1,8 +1,7 @@
 import { createServer } from "node:http";
 const DEFAULT_PORT = 8080;
 const MAX_REQUEST_BYTES = 4 * 1024 * 1024;
-let count = 0;
-function page() {
+function page(count = 0) {
     return {
         id: "ts-process",
         label: "TS 服务",
@@ -16,6 +15,7 @@ function page() {
             kind: "actions",
             title: "TypeScript 进程插件 v2 已在线",
             content: `计数：${count}`,
+            state: { count },
             actions: [{ id: "increment", label: "TypeScript +1" }],
         },
     };
@@ -41,8 +41,12 @@ const server = createServer(async (request, response) => {
                 respond(response, 400, "application/json; charset=utf-8", JSON.stringify({ error: "page action is not declared" }));
                 return;
             }
-            count += 1;
-            respond(response, 200, "application/json; charset=utf-8", JSON.stringify({ body: page().body }));
+            const count = action.body?.state?.count;
+            if (!Number.isSafeInteger(count) || Number(count) < 0) {
+                respond(response, 400, "application/json; charset=utf-8", JSON.stringify({ error: "page state count must be a non-negative integer" }));
+                return;
+            }
+            respond(response, 200, "application/json; charset=utf-8", JSON.stringify({ body: page(Number(count) + 1).body }));
             return;
         }
         if (url.pathname === "/echo") {

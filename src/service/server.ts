@@ -8,9 +8,7 @@ type RuntimeContext = {
   userId: string;
 };
 
-let count = 0;
-
-function page() {
+function page(count = 0) {
   return {
     id: "ts-process",
     label: "TS 服务",
@@ -24,6 +22,7 @@ function page() {
       kind: "actions",
       title: "TypeScript 进程插件 v2 已在线",
       content: `计数：${count}`,
+      state: { count },
       actions: [{ id: "increment", label: "TypeScript +1" }],
     },
   } as const;
@@ -49,6 +48,7 @@ const server = createServer(async (request, response) => {
       const action = JSON.parse(await readBody(request)) as {
         page_id?: string;
         action_id?: string;
+        body?: { state?: { count?: unknown } };
       };
       if (action.page_id !== "ts-process" || action.action_id !== "increment") {
         respond(
@@ -59,12 +59,21 @@ const server = createServer(async (request, response) => {
         );
         return;
       }
-      count += 1;
+      const count = action.body?.state?.count;
+      if (!Number.isSafeInteger(count) || Number(count) < 0) {
+        respond(
+          response,
+          400,
+          "application/json; charset=utf-8",
+          JSON.stringify({ error: "page state count must be a non-negative integer" }),
+        );
+        return;
+      }
       respond(
         response,
         200,
         "application/json; charset=utf-8",
-        JSON.stringify({ body: page().body }),
+        JSON.stringify({ body: page(Number(count) + 1).body }),
       );
       return;
     }
