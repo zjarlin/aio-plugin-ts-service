@@ -1,0 +1,48 @@
+name: Verify plugin
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.23.1
+
+      - name: 启用仓库内 pnpm
+        run: |
+          mkdir -p "$RUNNER_TEMP/corepack"
+          corepack enable --install-directory "$RUNNER_TEMP/corepack"
+          echo "$RUNNER_TEMP/corepack" >> "$GITHUB_PATH"
+
+      - name: 安装 TypeScript 依赖
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: 构建并测试 Node 服务
+        run: |
+          pnpm typecheck
+          pnpm test
+          pnpm build
+          git diff --exit-code -- dist/service/server.js
+
+      - name: 安装 Rust 工具链
+        run: rustup toolchain install nightly --profile minimal
+
+      - name: 检出 AIO 校验器
+        uses: actions/checkout@v4
+        with:
+          repository: zjarlin/aio
+          path: aio-host-source
+          submodules: recursive
+
+      - name: 验证 AIO 插件协议
+        run: cargo +nightly run --manifest-path aio-host-source/Cargo.toml --bin aio -- plugin validate "$GITHUB_WORKSPACE"
