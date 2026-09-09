@@ -1,6 +1,6 @@
 # AIO TypeScript 进程插件
 
-这是使用固定 pnpm 和 TypeScript 工具链构建的 AIO `process` 示例插件。它贡献一个语言无关的 `PageDefinition` 页面和一个受限的 `/echo` 后端路由。
+这是使用固定 pnpm 和 TypeScript 工具链构建的 AIO `process` 示例插件。它贡献一个语言无关的 `PageDefinition` 页面和一个受限的 `/echo` 后端路由。页面动作严格要求 AIO [`plugin-request.schema.json`](https://raw.githubusercontent.com/zjarlin/aio/main/docs/plugin/schema/plugin-request.schema.json) 中的 `kind` 与受信上下文字段。
 
 ```bash
 corepack enable

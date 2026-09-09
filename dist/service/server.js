@@ -37,8 +37,20 @@ const server = createServer(async (request, response) => {
         }
         if (request.method === "POST" && url.pathname === "/aio/action") {
             const action = JSON.parse(await readBody(request));
+            if (action.kind !== "page_action") {
+                respond(response, 400, "application/json; charset=utf-8", JSON.stringify({ error: "plugin request kind is not supported" }));
+                return;
+            }
             if (action.page_id !== "ts-process" || action.action_id !== "increment") {
                 respond(response, 400, "application/json; charset=utf-8", JSON.stringify({ error: "page action is not declared" }));
+                return;
+            }
+            if (typeof action.tenant_id !== "string" ||
+                action.tenant_id.length === 0 ||
+                typeof action.user_id !== "string" ||
+                action.user_id.length === 0 ||
+                action.body?.kind !== "actions") {
+                respond(response, 400, "application/json; charset=utf-8", JSON.stringify({ error: "trusted page action context is required" }));
                 return;
             }
             const count = action.body?.state?.count;
