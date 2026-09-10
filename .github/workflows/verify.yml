@@ -41,7 +41,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: zjarlin/aio
-          ref: 52fa78b686a293a71bd4e65d74c770941613cd5d
+          ref: fd343767a0e74de974d8a57abeeae06032602a82
           path: aio-host-source
           submodules: recursive
 
