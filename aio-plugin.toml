@@ -7,6 +7,12 @@ entrypoint = ["node", "{artifact}"]
 health_check = "/health"
 shutdown_timeout_seconds = 10
 
+[plugin.marketplace]
+title = "TypeScript Process Service"
+summary = "使用固定 pnpm 与 TypeScript 工具链构建无状态 Node 服务，由宿主按租户持久化动作页面并代理后端路由。"
+license = "MIT"
+tags = ["example", "typescript", "node", "process", "full-stack"]
+
 [plugin.capabilities]
 network = []
 filesystem = []
